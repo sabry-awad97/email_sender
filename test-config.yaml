@@ -1,0 +1,19 @@
+attachment_max_size: 26214400
+default_sender: your-email@gmail.com
+logging:
+  console: true
+  file: null
+  format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+  level: INFO
+smtp:
+  password: your-app-password
+  port: 465
+  server: smtp.gmail.com
+  use_tls: true
+  username: your-email@gmail.com
+templates:
+  default:
+    attachments: []
+    body: This email was sent using the email-sender CLI tool.
+    name: default
+    subject: Email from CLI

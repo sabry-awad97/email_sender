@@ -1,0 +1,91 @@
+# Email Sender CLI Configuration Example
+# Copy this file to ~/.email-sender/config.yaml and customize
+
+# SMTP server configuration
+smtp:
+  server: smtp.gmail.com          # SMTP server hostname
+  port: 465                       # SMTP server port (465 for SSL, 587 for TLS)
+  use_tls: true                   # Use TLS/SSL encryption
+  username: your-email@gmail.com  # Your email address
+  password: your-app-password     # App password (not your regular password)
+
+# Default sender email (optional, defaults to SMTP username)
+default_sender: your-email@gmail.com
+
+# Logging configuration
+logging:
+  level: INFO                     # Log level: DEBUG, INFO, WARNING, ERROR, CRITICAL
+  console: true                   # Enable console logging
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  # file: email-sender.log        # Uncomment to enable file logging
+
+# Maximum attachment size in bytes (25MB by default)
+attachment_max_size: 26214400
+
+# Email templates
+templates:
+  # Default template
+  default:
+    name: default
+    subject: Email from CLI
+    body: This email was sent using the email-sender CLI tool.
+    attachments: []
+
+  # Welcome email template
+  welcome:
+    name: welcome
+    subject: Welcome to Our Service!
+    body: |
+      Hello and welcome!
+      
+      We're excited to have you on board. Here's what you can expect:
+      
+      - Access to all our features
+      - 24/7 customer support
+      - Regular updates and improvements
+      
+      If you have any questions, don't hesitate to reach out.
+      
+      Best regards,
+      The Team
+    attachments: []
+
+  # Newsletter template
+  newsletter:
+    name: newsletter
+    subject: Monthly Newsletter
+    body: |
+      Dear Subscriber,
+      
+      Here's what's new this month:
+      
+      - Feature updates
+      - Company news
+      - Upcoming events
+      
+      Thank you for being part of our community!
+      
+      Best regards,
+      Newsletter Team
+    attachments: []
+
+  # Report template with attachment
+  report:
+    name: report
+    subject: Monthly Report
+    body: |
+      Dear Team,
+      
+      Please find attached the monthly report for your review.
+      
+      Key highlights:
+      - Performance metrics
+      - Analysis and insights
+      - Recommendations
+      
+      Please let me know if you have any questions.
+      
+      Best regards,
+      Report Team
+    attachments:
+      - report.pdf
