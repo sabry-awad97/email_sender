@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Optional
+
 from rich.console import Console
 from rich.logging import RichHandler
 
@@ -8,16 +8,16 @@ from rich.logging import RichHandler
 class Logger:
     """Enhanced logging utility with configurable output and rich formatting."""
 
-    _logger: Optional[logging.Logger] = None
+    _logger: logging.Logger | None = None
     _console = Console()
 
     @classmethod
     def setup(
         cls,
         level: str = "INFO",
-        log_file: Optional[str] = None,
+        log_file: str | None = None,
         console: bool = True,
-        format_string: Optional[str] = None,
+        format_string: str | None = None,
     ):
         """Setup the logger with specified configuration."""
         if cls._logger is not None:

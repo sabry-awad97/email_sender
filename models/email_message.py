@@ -1,5 +1,4 @@
 from dataclasses import dataclass, field
-from typing import List
 
 
 @dataclass
@@ -8,4 +7,4 @@ class EmailMessageModel:
     receiver: str
     subject: str
     body: str
-    attachments: List[object] = field(default_factory=list)
+    attachments: list[object] = field(default_factory=list)

@@ -1,6 +1,6 @@
 import mimetypes
 from pathlib import Path
-from typing import Tuple
+
 from core.interfaces import IAttachment
 
 
@@ -19,14 +19,14 @@ class FileAttachment(IAttachment):
         try:
             with open(self.path, "rb") as f:
                 return f.read()
-        except IOError as e:
-            raise RuntimeError(f"Failed to read attachment file {self.path}: {e}")
+        except OSError as e:
+            raise RuntimeError(f"Failed to read attachment file {self.path}: {e}") from e
 
     def get_filename(self) -> str:
         """Return the filename without path."""
         return self.path.name
 
-    def get_mime_type(self) -> Tuple[str, str]:
+    def get_mime_type(self) -> tuple[str, str]:
         """Get MIME type and subtype for the file."""
         mime_type, _ = mimetypes.guess_type(str(self.path))
         if mime_type:

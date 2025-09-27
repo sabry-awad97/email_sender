@@ -1,6 +1,7 @@
 import smtplib
 import ssl
 from email.message import EmailMessage as PyEmailMessage
+
 from core.interfaces import IEmailClient
 from infrastructure.logger import Logger
 

@@ -2,16 +2,15 @@
 
 import sys
 from pathlib import Path
-from typing import Optional
 
 import click
 from rich.console import Console
 from rich.table import Table
 
-from config.manager import ConfigManager, ConfigurationError
-from cli.commands.send import send_command
 from cli.commands.config import config_command
+from cli.commands.send import send_command
 from cli.commands.template import template_command
+from config.manager import ConfigManager, ConfigurationError
 from infrastructure.logger import Logger
 
 console = Console()
@@ -28,7 +27,7 @@ console = Console()
 @click.option("--quiet", "-q", is_flag=True, help="Suppress all output except errors")
 @click.version_option(version="0.1.0", prog_name="email-sender")
 @click.pass_context
-def cli(ctx: click.Context, config: Optional[Path], verbose: bool, quiet: bool):
+def cli(ctx: click.Context, config: Path | None, verbose: bool, quiet: bool):
     """
     Email Sender CLI - A robust tool for sending emails with attachments.
 

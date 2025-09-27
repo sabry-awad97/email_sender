@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import Tuple
 
 
 class IEmailClient(ABC):
@@ -24,7 +23,7 @@ class IAttachment(ABC):
         """Get attachment filename."""
         pass
 
-    def get_mime_type(self) -> Tuple[str, str]:
+    def get_mime_type(self) -> tuple[str, str]:
         """Get MIME type and subtype. Default implementation returns generic binary."""
         return "application", "octet-stream"
 
