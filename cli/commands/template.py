@@ -508,6 +508,171 @@ def _interactive_template_edit(
     return subject, body, add_attach, remove_attach
 
 
+@template_command.command("import")
+@click.argument("file_path", type=click.Path(exists=True, path_type=Path))
+@click.option("--overwrite", is_flag=True, help="Overwrite existing templates")
+@click.pass_context
+def import_templates(ctx: click.Context, file_path: Path, overwrite: bool):
+    """Import templates from a JSON or YAML file.
+
+    FILE_PATH: Path to the template file to import
+
+    Examples:
+        # Import templates from JSON
+        email-sender template import templates.json
+
+        # Import with overwrite
+        email-sender template import templates.yaml --overwrite
+    """
+    config: AppConfig | None = ctx.obj.get("config")
+    config_manager: ConfigManager = ctx.obj["config_manager"]
+
+    if not config:
+        console.print("[red]Error:[/red] No configuration loaded.")
+        console.print("Run 'email-sender config init' to create a configuration file.")
+        raise click.Abort()
+
+    try:
+        # Read template file
+        if file_path.suffix.lower() in [".yaml", ".yml"]:
+            import yaml
+
+            with open(file_path, encoding="utf-8") as f:
+                template_data = yaml.safe_load(f)
+        elif file_path.suffix.lower() == ".json":
+            import json
+
+            with open(file_path, encoding="utf-8") as f:
+                template_data = json.load(f)
+        else:
+            console.print("[red]Error:[/red] Unsupported file format. Use JSON or YAML.")
+            raise click.Abort()
+
+        # Import templates
+        imported_count = 0
+        skipped_count = 0
+
+        for name, template_info in template_data.items():
+            if name in config.templates and not overwrite:
+                console.print(f"[yellow]Skipped:[/yellow] Template '{name}' already exists")
+                skipped_count += 1
+                continue
+
+            # Create template
+            template = EmailTemplate(
+                name=name,
+                subject=template_info.get("subject", ""),
+                body=template_info.get("body", ""),
+                attachments=template_info.get("attachments", []),
+            )
+
+            config.templates[name] = template
+            imported_count += 1
+            console.print(f"[green]✓[/green] Imported template: {name}")
+
+        # Save configuration
+        config_path = config_manager.config_file_path or config_manager.DEFAULT_CONFIG_PATHS[0]
+        config_manager.save_config(config, config_path)
+
+        console.print(
+            f"\n[green]✓[/green] Import complete: {imported_count} imported, {skipped_count} skipped"
+        )
+
+    except Exception as e:
+        Logger.exception("Failed to import templates")
+        console.print(f"[red]Error:[/red] Failed to import templates: {e}")
+        raise click.Abort() from e
+
+
+@template_command.command("export")
+@click.argument("file_path", type=click.Path(path_type=Path))
+@click.option(
+    "--format",
+    "export_format",
+    type=click.Choice(["json", "yaml"]),
+    default="yaml",
+    help="Export format",
+)
+@click.option("--templates", multiple=True, help="Specific templates to export (default: all)")
+@click.pass_context
+def export_templates(ctx: click.Context, file_path: Path, export_format: str, templates: tuple):
+    """Export templates to a JSON or YAML file.
+
+    FILE_PATH: Path where to save the exported templates
+
+    Examples:
+        # Export all templates to YAML
+        email-sender template export templates.yaml
+
+        # Export specific templates to JSON
+        email-sender template export templates.json --format json --templates welcome --templates newsletter
+    """
+    config: AppConfig | None = ctx.obj.get("config")
+
+    if not config:
+        console.print("[red]Error:[/red] No configuration loaded.")
+        console.print("Run 'email-sender config init' to create a configuration file.")
+        raise click.Abort()
+
+    if not config.templates:
+        console.print("[yellow]Warning:[/yellow] No templates to export.")
+        return
+
+    try:
+        # Select templates to export
+        if templates:
+            export_templates_dict = {}
+            for template_name in templates:
+                if template_name in config.templates:
+                    template = config.templates[template_name]
+                    export_templates_dict[template_name] = {
+                        "subject": template.subject,
+                        "body": template.body,
+                        "attachments": template.attachments,
+                    }
+                else:
+                    console.print(f"[yellow]Warning:[/yellow] Template '{template_name}' not found")
+        else:
+            # Export all templates
+            export_templates_dict = {}
+            for name, template in config.templates.items():
+                export_templates_dict[name] = {
+                    "subject": template.subject,
+                    "body": template.body,
+                    "attachments": template.attachments,
+                }
+
+        if not export_templates_dict:
+            console.print("[yellow]Warning:[/yellow] No templates selected for export.")
+            return
+
+        # Ensure directory exists
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+
+        # Export templates
+        if export_format == "json":
+            import json
+
+            with open(file_path, "w", encoding="utf-8") as f:
+                json.dump(export_templates_dict, f, indent=2, ensure_ascii=False)
+        else:  # yaml
+            import yaml
+
+            with open(file_path, "w", encoding="utf-8") as f:
+                yaml.dump(
+                    export_templates_dict, f, default_flow_style=False, indent=2, allow_unicode=True
+                )
+
+        console.print(
+            f"[green]✓[/green] Exported {len(export_templates_dict)} templates to {file_path}"
+        )
+
+    except Exception as e:
+        Logger.exception("Failed to export templates")
+        console.print(f"[red]Error:[/red] Failed to export templates: {e}")
+        raise click.Abort() from e
+
+
 def _suggest_templates(available_templates: list[str]):
     """Suggest available templates when template not found."""
     if available_templates:
